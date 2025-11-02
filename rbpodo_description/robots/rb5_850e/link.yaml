@@ -5,12 +5,13 @@ link0:
       xyz: "0 0 0"
       rpy: "0 0 0"
     inertia:
-      xx: 0.001
-      xy: 0.0
-      xz: 0.0
-      yy: 0.001
-      yz: 0.0
-      zz: 0.001
+      xx: 0.000437
+      xy: -0.000000
+      xz: 0.000000
+      yy: 0.000387
+      yz: 0.000006
+      zz: 0.000605
+
 link1:
   inertial:
     origin:

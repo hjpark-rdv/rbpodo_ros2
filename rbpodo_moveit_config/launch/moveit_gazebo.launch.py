@@ -91,8 +91,11 @@ def generate_launch_description():
         package="ros_gz_sim",
         executable="create",
         output="screen",
-        arguments=["-name", model_id, "-topic", "robot_description"],
+        arguments=["-name", model_id, "-topic", "robot_description", "-x", "1.0","-z", "0.0", ],
     )
+
+    delayed_spawn_robot = TimerAction(period=5.0, actions=[spawn])
+
 
     # 4) Bridge /clock (Gazebo → ROS2)
     clock_bridge = Node(
@@ -190,7 +193,7 @@ def generate_launch_description():
         + [
             gz,
             rsp,
-            spawn,
+            delayed_spawn_robot,
             clock_bridge,
             move_group,
             rviz,

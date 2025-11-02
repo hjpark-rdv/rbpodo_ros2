@@ -1,3 +1,16 @@
+link0:
+  inertial:
+    mass: 50.0
+    origin:
+      xyz: "0 0 0"
+      rpy: "0 0 0"
+    inertia:
+      xx: 0.001
+      xy: 0.0
+      xz: 0.0
+      yy: 0.001
+      yz: 0.0
+      zz: 0.001
 link1:
   inertial:
     origin:

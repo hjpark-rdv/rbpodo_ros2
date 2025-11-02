@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="rb5_850e">
+
+  <xacro:include filename="$(find rbpodo_description)/robots/rb_6dof.xacro" />
+  <xacro:include filename="$(find rbpodo_description)/robots/rb_6dof.ros2_control.xacro" />
+
+  <xacro:arg name="prefix" default="" />
+  <xacro:arg name="robot_ip" default="10.0.2.7"/>
+  <xacro:arg name="cb_simulation" default="true"/>
+  <xacro:arg name="use_fake_hardware" default="false"/>
+  <xacro:arg name="fake_sensor_commands" default="false"/>
+
+  <!-- 추가: Gazebo 실행 여부 플래그 (Gazebo면 true) -->
+  <xacro:arg name="use_gazebo" default="false"/>
+
+  <!-- torque_constant = actual_torque_constant * gear_ratio -->
+  <xacro:property name="base_tc" value="${1}" />
+  <xacro:property name="shoulder_tc" value="${1}" />
+  <xacro:property name="elbow_tc" value="${1}" />
+  <xacro:property name="wrist1_tc" value="${1}" />
+  <xacro:property name="wrist2_tc" value="${1}" />
+  <xacro:property name="wrist3_tc" value="${1}" />
+
+  <xacro:rb_6dof model_id="rb5_850e" prefix="$(arg prefix)" tcp_name="tcp" tcp_xyz="0 -0.0967 0" tcp_rpy="0 0 0" />
+
+  <!-- ✅ 실기용 ros2_control 블록: Gazebo가 아닐 때만 출력 -->
+  <xacro:unless value="$(arg use_gazebo)">
+    <xacro:rb_6dof_ros2_control
+      prefix="$(arg prefix)"
+      robot_ip="$(arg robot_ip)"
+      cb_simulation="$(arg cb_simulation)"
+      use_fake_hardware="$(arg use_fake_hardware)"
+      fake_sensor_commands="$(arg fake_sensor_commands)"
+      torque_constants="${[base_tc, shoulder_tc, elbow_tc, wrist1_tc, wrist2_tc, wrist3_tc]}" />
+  </xacro:unless>
+
+  <!-- Gazebo 시뮬용 ros2_control 하드웨어/플러그인 -->
+  <ros2_control name="GazeboSimSystem" type="system">
+    <hardware>
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+    </hardware>
+
+    <joint name="base">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="shoulder">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="elbow">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="wrist1">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="wrist2">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="wrist3">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
+  <gazebo>
+    <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      <parameters>$(find rbpodo_bringup)/config/controllers.yaml</parameters>
+    </plugin>
+  </gazebo>
+
+</robot>

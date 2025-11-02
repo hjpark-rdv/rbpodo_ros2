@@ -38,6 +38,7 @@
   <ros2_control name="GazeboSimSystem" type="system">
     <hardware>
       <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+      <param name="position_proportional_gain">120.0</param>
     </hardware>
 
     <joint name="base">

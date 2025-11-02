@@ -9,7 +9,7 @@ base:
   limit:
     lower: -3.14
     upper: 3.14
-    effort: 10
+    effort: 100
     velocity: 3.14
 
 shoulder:
@@ -23,7 +23,7 @@ shoulder:
   limit:
     lower: -3.14
     upper: 3.14
-    effort: 10
+    effort: 100
     velocity: 3.14
 
 elbow:
@@ -37,7 +37,7 @@ elbow:
   limit:
     lower: -3.14
     upper: 3.14
-    effort: 10
+    effort: 100
     velocity: 3.14
 
 wrist1:
@@ -51,7 +51,7 @@ wrist1:
   limit:
     lower: -3.14
     upper: 3.14
-    effort: 10
+    effort: 100
     velocity: 3.14
 
 wrist2:
@@ -65,7 +65,7 @@ wrist2:
   limit:
     lower: -3.14
     upper: 3.14
-    effort: 10
+    effort: 100
     velocity: 3.14
 
 wrist3:
@@ -79,5 +79,5 @@ wrist3:
   limit:
     lower: -3.14
     upper: 3.14
-    effort: 10
+    effort: 100
     velocity: 3.14

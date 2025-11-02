@@ -16,6 +16,7 @@ from launch.substitutions import (
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 from moveit_configs_utils import MoveItConfigsBuilder
+from launch_ros.parameter_descriptions import ParameterValue
 
 """
 Unified Gazebo + MoveIt launch
@@ -52,13 +53,17 @@ def generate_launch_description():
 
     # Build robot_description once (Xacro → URDF) and share with Gazebo + MoveIt
     xacro_file = PathJoinSubstitution([rb_moveit, "config", "rbpodo.urdf.xacro"])  # keep single source of truth
+    # 2) robot_description 생성부에서 --inorder 삭제하고 --verbosity 0 추가
     robot_description_param = {
-        "robot_description": Command([
-            FindExecutable(name="xacro"),
-            " ", xacro_file,
-            " ", "model_id:=", model_id,
-            " ", "use_gazebo:=true",     # ← 시뮬레이션일 때만 true로
-        ])
+        "robot_description": ParameterValue(
+            Command([
+                FindExecutable(name="xacro"),
+                " ", xacro_file,
+                " ", "model_id:=", model_id,
+                " ", "use_gazebo:=true",
+            ]),
+            value_type=str,  # ← 문자열 강제 (YAML 파싱 방지)
+        )
     }
 
     # MoveIt configuration derived from your existing package
@@ -153,6 +158,21 @@ def generate_launch_description():
         ],
     )
 
+    camera_bridge = Node(
+        package="ros_gz_bridge",
+        executable="parameter_bridge",
+        output="screen",
+        arguments=[
+            # "/rgb_camera/image@sensor_msgs/msg/Image@gz.msgs.Image",
+            # "/rgb_camera/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo",
+            # "/depth_camera/depth_image@sensor_msgs/msg/Image@gz.msgs.Image",
+            "/camera_rgb@sensor_msgs/msg/Image@gz.msgs.Image",
+            # '/camera_rgb_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo',
+            
+        ],
+        parameters=[{"use_sim_time": True}],
+    )
+
     # Delay spawners until Gazebo + gz_ros2_control are alive
     delayed_spawn_js = TimerAction(period=5.0, actions=[spawn_js])
     delayed_spawn_arm = TimerAction(period=6.5, actions=[spawn_arm])
@@ -199,5 +219,6 @@ def generate_launch_description():
             rviz,
             delayed_spawn_js,
             delayed_spawn_arm,
+            camera_bridge,
         ]
     )

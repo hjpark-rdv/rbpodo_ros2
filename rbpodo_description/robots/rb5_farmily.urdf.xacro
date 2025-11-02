@@ -11,7 +11,7 @@
   <xacro:arg name="fake_sensor_commands" default="false"/>
 
   <!-- 추가: Gazebo 실행 여부 플래그 (Gazebo면 true) -->
-  <xacro:arg name="use_gazebo" default="false"/>
+  <xacro:arg name="use_gazebo" default="true"/>
 
   <!-- torque_constant = actual_torque_constant * gear_ratio -->
   <xacro:property name="base_tc" value="${1}" />
@@ -33,6 +33,188 @@
       fake_sensor_commands="$(arg fake_sensor_commands)"
       torque_constants="${[base_tc, shoulder_tc, elbow_tc, wrist1_tc, wrist2_tc, wrist3_tc]}" />
   </xacro:unless>
+
+    <!-- (추가) 바닥판 옵션 -->
+  <xacro:arg name="floor_enable"   default="true"/>      <!-- use_gazebo가 true일 때만 의미 있음 -->
+  <xacro:arg name="floor_size_xy"  default="2.0"/>       <!-- 2 m -->
+  <xacro:arg name="floor_thickness" default="0.01"/>     <!-- 1 cm -->
+  <xacro:arg name="floor_gap_z" default="0.01"/>          <!-- 바닥판과 link0 사이의 간격 -->
+
+  <!-- Gazebo에서만 바닥판을 루트로 올리고, link0을 그 child로 고정 -->
+  <xacro:if value="$(arg use_gazebo)">
+    <xacro:if value="$(arg floor_enable)">
+
+      <!-- 새 루트: 바닥판 -->
+      <link name="aux_floor_plate">
+        <!-- 너무 큰 질량/관성은 시뮬에 영향 줄 수 있으니 매우 작게 -->
+        <inertial>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <mass value="1e-6"/>
+          <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9"/>
+        </inertial>
+
+        <collision name="aux_floor_plate_collision">
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <geometry>
+            <box size="$(arg floor_size_xy) $(arg floor_size_xy) $(arg floor_thickness)"/>
+          </geometry>
+        </collision>
+
+        <visual name="aux_floor_plate_visual">
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <geometry>
+            <box size="$(arg floor_size_xy) $(arg floor_size_xy) $(arg floor_thickness)"/>
+          </geometry>
+          <material name="Gazebo/FlatBlack"/>
+        </visual>
+      </link>
+
+      <!-- link0를 바닥판 위(+z)로 고정: link0이 child가 됨 -->
+      <joint name="aux_floor_plate_to_link0" type="fixed">
+        <parent link="aux_floor_plate"/>
+        <child  link="link0"/>  <!-- 당신 모델의 최상위 링크 이름 -->
+        <origin xyz="0 0 $(arg floor_gap_z)" rpy="0 0 0"/>
+      </joint>
+
+      <!-- Gazebo 전용 접촉/마찰(단단한 판) -->
+      <gazebo reference="aux_floor_plate">
+        <mu1>1.0</mu1>
+        <mu2>1.0</mu2>
+        <kp>1e9</kp>
+        <kd>1.0</kd>
+        <minDepth>1e-4</minDepth>
+        <maxVel>0.1</maxVel>
+        <material>Gazebo/FlatBlack</material>
+      </gazebo>
+
+    </xacro:if>
+  </xacro:if>
+
+  <xacro:if value="$(arg use_gazebo)">
+    <link name="web_camera_tower">
+      <!-- 너무 큰 관성 방지용으로 아주 작은 값 -->
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="1e-6"/>
+        <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9"/>
+      </inertial>
+
+      <visual name="web_camera_tower_visual">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://rbpodo_description/meshes/rb5_farmily/Web_Camera_Tower.stl" scale="0.001 0.001 0.001"/>
+          <!-- $(find rbpodo_description)/meshes/... 형태를 쓰고 싶으면 위 줄을
+              <mesh filename="$(find rbpodo_description)/meshes/rb5_farmily/Web_Camera_Tower.stl" scale="1 1 1"/>
+              로 바꿔도 됩니다. -->
+        </geometry>
+      </visual>
+
+      <collision name="web_camera_tower_collision">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://rbpodo_description/meshes/rb5_farmily/Web_Camera_Tower.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="aux_floor_plate_to_web_camera_tower" type="fixed">
+      <parent link="aux_floor_plate"/>
+      <child  link="web_camera_tower"/>
+      <!-- 하판 기준 (x,y) = (1.0, 1.0), z는 판 위로 살짝: floor_thickness 만큼 띄움 -->
+      <origin xyz="0.5 0.0 $(arg floor_thickness)" rpy="0 0 1.57"/>
+    </joint>
+
+        <!-- Gazebo 전용 접촉/마찰(단단한 판) -->
+    <gazebo reference="web_camera_tower">
+      <mu1>1.0</mu1>
+      <mu2>1.0</mu2>
+      <kp>1e9</kp>
+      <kd>1.0</kd>
+      <minDepth>1e-4</minDepth>
+      <maxVel>0.1</maxVel>
+      <material>Gazebo/FlatYellow</material>
+    </gazebo>
+
+
+    <link name="camera_module">
+      <!-- 너무 큰 관성 방지용으로 아주 작은 값 -->
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="1e-6"/>
+        <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9"/>
+      </inertial>
+
+      <visual name="camera_module_visual">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://rbpodo_description/meshes/rb5_farmily/roundy_camera.stl" scale="0.005 0.005 0.005"/>
+          <!-- $(find rbpodo_description)/meshes/... 형태를 쓰고 싶으면 위 줄을
+              <mesh filename="$(find rbpodo_description)/meshes/rb5_farmily/Web_Camera_Tower.stl" scale="1 1 1"/>
+              로 바꿔도 됩니다. -->
+        </geometry>
+      </visual>
+
+      <collision name="camera_module_collision">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://rbpodo_description/meshes/rb5_farmily/roundy_camera.stl" scale="0.005 0.005  0.005"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="web_camera_tower_to_camera_module" type="fixed">
+      <parent link="web_camera_tower"/>
+      <child  link="camera_module"/>
+      <!-- 하판 기준 (x,y) = (1.0, 1.0), z는 판 위로 살짝: floor_thickness 만큼 띄움 -->
+      <origin xyz="0.0 0.0 0.4" rpy="0 0 3.141592"/>
+    </joint>
+
+    <gazebo reference="camera_module">
+      <mu1>1.0</mu1>
+      <mu2>1.0</mu2>
+      <kp>1e9</kp>
+      <kd>1.0</kd>
+      <minDepth>1e-4</minDepth>
+      <maxVel>0.1</maxVel>
+      <material>Gazebo/FlatYellow</material>
+    </gazebo>
+
+  </xacro:if>
+
+  <!-- ===== Gazebo일 때만 카메라 추가 ===== -->
+  <xacro:if value="$(arg use_gazebo)">
+    <!-- 카메라 장착용 child 링크 -->
+    <link name="camera_rgb"/>    
+    <joint name="camera_rgbd_joint" type="fixed">
+      <parent link="camera_module"/>
+      <child  link="camera_rgb"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Gazebo 플러그인으로 RGB 카메라 센서 추가 -->
+    <gazebo reference="camera_rgb">
+      <sensor name="camera_rgb" type="camera">
+        <always_on>true</always_on>
+        <update_rate>30.0</update_rate>  <!-- Hz -->
+        <visualize>true</visualize>
+        <topic>/camera_rgb</topic>  <!-- ROS 토픽 -->
+        <gz_frame_id>camera_rgb</gz_frame_id>  <!-- GZ 프레임 ID -->
+        <camera>
+          <horizontal_fov>1.3962634</horizontal_fov>  <!-- 수평 시야각 (라디안) -->
+          <image>
+            <width>640</width>
+            <height>480</height>
+            <format>R8G8B8</format>  <!-- RGB 형식 -->
+          </image>
+          <clip>
+            <near>0.1</near>
+            <far>10.0</far>  <!-- 클리핑 거리 -->
+          </clip>
+        </camera>
+      </sensor>
+    </gazebo>
+
+  </xacro:if>
 
   <!-- Gazebo 시뮬용 ros2_control 하드웨어/플러그인 -->
   <ros2_control name="GazeboSimSystem" type="system">

@@ -12,6 +12,17 @@
     <group name="mainpulation">
         <chain base_link="link0" tip_link="tcp"/>
     </group>
+
+    <!-- 2) 그룹의 'home' 자세(예: 6축 전부 0rad) -->
+    <group_state name="home" group="mainpulation">
+        <joint name="base"    value="-1.5707963268"/>
+        <joint name="shoulder" value="-0.2792526803"/>
+        <joint name="elbow"    value="1.8151424221"/>
+        <joint name="wrist1"   value="0.0"/>
+        <joint name="wrist2"   value="1.5707963268"/>
+        <joint name="wrist3"   value="0.0"/>
+    </group_state>
+
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
     <virtual_joint name="fixed_joint" type="fixed" parent_frame="world" child_link="link0"/>
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->

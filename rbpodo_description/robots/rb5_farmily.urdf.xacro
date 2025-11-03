@@ -41,6 +41,11 @@
   <xacro:arg name="floor_gap_z" default="0.01"/>          <!-- 바닥판과 link0 사이의 간격 -->
 
   <!-- Gazebo에서만 바닥판을 루트로 올리고, link0을 그 child로 고정 -->
+
+  <material name="flat_black">
+    <color rgba="0.0 0.0 0.0 1.0"/>
+  </material>
+
   <xacro:if value="$(arg use_gazebo)">
     <xacro:if value="$(arg floor_enable)">
 
@@ -65,7 +70,9 @@
           <geometry>
             <box size="$(arg floor_size_xy) $(arg floor_size_xy) $(arg floor_thickness)"/>
           </geometry>
-          <material name="Gazebo/FlatBlack"/>
+          <material name="yellow">
+            <color rgba="1.0 1.0 0.0 1.0"/>
+          </material>
         </visual>
       </link>
 
@@ -107,6 +114,9 @@
               <mesh filename="$(find rbpodo_description)/meshes/rb5_farmily/Web_Camera_Tower.stl" scale="1 1 1"/>
               로 바꿔도 됩니다. -->
         </geometry>
+        <material name="blue">
+            <color rgba="0.0 0.0 1.0 1.0"/>
+        </material>
       </visual>
 
       <collision name="web_camera_tower_collision">
@@ -152,6 +162,9 @@
               <mesh filename="$(find rbpodo_description)/meshes/rb5_farmily/Web_Camera_Tower.stl" scale="1 1 1"/>
               로 바꿔도 됩니다. -->
         </geometry>
+        <material name="green">
+            <color rgba="0.0 1.0 0.0 1.0"/>
+        </material>
       </visual>
 
       <collision name="camera_module_collision">

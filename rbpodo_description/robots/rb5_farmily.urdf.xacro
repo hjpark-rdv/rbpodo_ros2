@@ -229,6 +229,42 @@
 
   </xacro:if>
 
+    <!-- === Cylinder under tcp along +Y === -->
+  <link name="tcp_cylinder">
+    <!-- 관성 최소값 (시뮬 안정용) -->
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1e-6"/>
+      <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9"/>
+    </inertial>
+
+    <!-- 시각/충돌 동일 형상 -->
+    <visual>
+      <!-- y=0.075: 길이 0.15가 tcp 원점에서 +Y로 뻗도록 중심 이동 -->
+      <!-- rpy=1.570796 0 0: 실린더 축(Z)을 Y축 방향으로 회전 -->
+      <origin xyz="0 0.075 0" rpy="1.570796 0 0"/>
+      <geometry>
+        <cylinder radius="0.015" length="0.15"/>
+      </geometry>
+      <material name="silver">
+        <color rgba="0.7 0.7 0.7 1.0"/>
+      </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0.075 0" rpy="1.570796 0 0"/>
+      <geometry>
+        <cylinder radius="0.015" length="0.15"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="tcp_to_cylinder" type="fixed">
+    <parent link="tcp"/>
+    <child  link="tcp_cylinder"/>
+    <origin xyz="0 -0.15 0" rpy="0 0 0"/>
+  </joint>
+
   <!-- Gazebo 시뮬용 ros2_control 하드웨어/플러그인 -->
   <ros2_control name="GazeboSimSystem" type="system">
     <hardware>

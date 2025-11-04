@@ -265,6 +265,13 @@
     <origin xyz="0 -0.15 0" rpy="0 0 0"/>
   </joint>
 
+  <link name="end_effector"/>
+  <joint name="cylinder_to_end_effector" type="fixed">
+    <parent link="tcp_cylinder"/>
+    <child  link="end_effector"/>
+    <origin xyz="0 0 0" rpy="0 0 -1.57"/>
+  </joint>
+
   <!-- Gazebo 시뮬용 ros2_control 하드웨어/플러그인 -->
   <ros2_control name="GazeboSimSystem" type="system">
     <hardware>

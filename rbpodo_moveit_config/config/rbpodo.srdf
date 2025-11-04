@@ -11,7 +11,7 @@
     <!--SUBGROUPS: Groups can also be formed by referencing to already defined group names-->
     <group name="mainpulation">
         <!-- <chain base_link="link0" tip_link="tcp"/> -->
-        <chain base_link="link0" tip_link="tcp_cylinder"/>
+        <chain base_link="link0" tip_link="end_effector"/>
     </group>
 
     <!-- 2) 그룹의 'home' 자세(예: 6축 전부 0rad) -->
@@ -40,4 +40,5 @@
     <disable_collisions link1="link4" link2="link6" reason="Never"/>
     <disable_collisions link1="link5" link2="link6" reason="Adjacent"/>
     <disable_collisions link1="link6" link2="tcp_cylinder" reason="Adjacent"/>
+    <disable_collisions link1="tcp_cylinder" link2="end_effector" reason="Adjacent"/>
 </robot>

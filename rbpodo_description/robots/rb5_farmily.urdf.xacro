@@ -229,47 +229,50 @@
 
   </xacro:if>
 
-    <!-- === Cylinder under tcp along +Y === -->
-  <link name="tcp_cylinder">
-    <!-- 관성 최소값 (시뮬 안정용) -->
+    <link name="tcp_cylinder">
+    <!-- 너무 큰 관성 방지용으로 아주 작은 값 -->
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <mass value="1e-6"/>
       <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9"/>
     </inertial>
 
-    <!-- 시각/충돌 동일 형상 -->
-    <visual>
-      <!-- y=0.075: 길이 0.15가 tcp 원점에서 +Y로 뻗도록 중심 이동 -->
-      <!-- rpy=1.570796 0 0: 실린더 축(Z)을 Y축 방향으로 회전 -->
-      <origin xyz="0 0.075 0" rpy="1.570796 0 0"/>
+    <visual name="tcp_cylinder_visual">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <cylinder radius="0.015" length="0.15"/>
+        <mesh filename="package://rbpodo_description/meshes/rb5_farmily/pvc_pipe_L.stl" scale="0.005 0.005 0.005"/>
+        <!-- $(find rbpodo_description)/meshes/... 형태를 쓰고 싶으면 위 줄을
+            <mesh filename="$(find rbpodo_description)/meshes/rb5_farmily/Web_Camera_Tower.stl" scale="1 1 1"/>
+            로 바꿔도 됩니다. -->
       </geometry>
-      <material name="silver">
-        <color rgba="0.7 0.7 0.7 1.0"/>
+      <material name="green">
+          <color rgba="0.0 1.0 0.0 1.0"/>
       </material>
     </visual>
 
-    <collision>
-      <origin xyz="0 0.075 0" rpy="1.570796 0 0"/>
+    <collision name="tcp_cylinder_collision">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <cylinder radius="0.015" length="0.15"/>
+        <mesh filename="package://rbpodo_description/meshes/rb5_farmily/pvc_pipe_L.stl" scale="0.005 0.005  0.005"/>
       </geometry>
     </collision>
   </link>
 
+
   <joint name="tcp_to_cylinder" type="fixed">
     <parent link="tcp"/>
     <child  link="tcp_cylinder"/>
-    <origin xyz="0 -0.15 0" rpy="0 0 0"/>
+    <!-- end effector가 아래를 바라보는 자세 -->
+    <!-- <origin xyz="0 -0.03 0.15" rpy="-1.57 0 0"/>  -->
+    <!-- end effector가 앞쪽을 바라보는 자세 -->
+    <origin xyz="0 0 0.0" rpy="1.57 0 -1.57"/>
   </joint>
 
   <link name="end_effector"/>
   <joint name="cylinder_to_end_effector" type="fixed">
     <parent link="tcp_cylinder"/>
     <child  link="end_effector"/>
-    <origin xyz="0 0 0" rpy="0 0 -1.57"/>
+    <origin xyz="0.15 0 0" rpy="0 0 0"/>
   </joint>
 
   <!-- Gazebo 시뮬용 ros2_control 하드웨어/플러그인 -->
@@ -277,6 +280,7 @@
     <hardware>
       <plugin>gz_ros2_control/GazeboSimSystem</plugin>
       <param name="position_proportional_gain">120.0</param>
+      <param name="update_rate">100.0</param>
     </hardware>
 
     <joint name="base">
@@ -314,6 +318,7 @@
   <gazebo>
     <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
       <parameters>$(find rbpodo_bringup)/config/controllers.yaml</parameters>
+      <update_rate>100</update_rate>
     </plugin>
   </gazebo>
 

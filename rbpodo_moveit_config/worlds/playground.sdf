@@ -12,7 +12,7 @@
 
     <gravity>0 0 -9.8</gravity>
     <physics default="0" name="default_physics" type="ode">
-      <max_step_size>0.1</max_step_size>
+      <max_step_size>0.01</max_step_size>
       <real_time_factor>1</real_time_factor>
       <real_time_update_rate>100</real_time_update_rate>
     </physics>
